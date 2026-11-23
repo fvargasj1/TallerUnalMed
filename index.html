@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu manuscrito, tu revista - Plataforma del taller (versión 1)</title>
+<style>
+:root{--navy:#001A69;--blue:#348AF7;--teal:#08C9C4;--pale:#D9EEFF;--line:#C9D3E6;--mute:#53607f}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Open Sans",system-ui,sans-serif;color:#111;background:#fff;line-height:1.5;padding-bottom:96px}
+h1,h2,h3{color:var(--navy);margin:0 0 8px}
+h2{font-size:24px}h3{font-size:18px}
+p{margin:0 0 10px}
+.top{background:var(--navy);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top h1{color:#fff;font-size:18px;margin:0}
+.top span{font-size:14px;color:var(--pale)}
+.wrap{display:grid;grid-template-columns:290px 1fr;gap:24px;max-width:1200px;margin:0 auto;padding:20px}
+.wrap.nojoin{grid-template-columns:1fr;max-width:720px}
+.wrap.nojoin nav{display:none}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.step{display:flex;gap:10px;width:100%;text-align:left;padding:10px;border:1px solid var(--line);background:#fff;border-radius:6px;margin-bottom:8px;cursor:pointer;font:inherit;color:#111}
+.step[disabled]{opacity:.6;cursor:not-allowed;background:#f4f6fb}
+.step.cur{border-color:var(--navy);background:var(--pale)}
+.step .n{font-weight:700;color:var(--navy);min-width:20px}
+.step small{display:block;color:var(--mute)}
+.card{border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:16px}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input[type=text],input[type=number],textarea,select{width:100%;padding:8px;border:1px solid #8a96b3;border-radius:4px;font:inherit;background:#fff}
+textarea{min-height:84px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.shot{border:2px dashed #8a96b3;border-radius:8px;min-height:240px;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px;background:#f7f9fd;color:var(--mute)}
+.shot img{max-width:100%;max-height:520px}
+.note{background:var(--pale);border-radius:8px;padding:12px 14px;color:var(--navy);font-size:14px;margin:12px 0}
+.small{font-size:13px;color:var(--mute)}
+.chk{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-weight:400}
+.chk input{margin-top:6px}
+details{margin:8px 0;border:1px solid var(--line);border-radius:6px;padding:8px 12px;background:#fbfcff}
+summary{cursor:pointer;font-weight:600;color:var(--navy)}
+.btn{background:var(--navy);color:#fff;border:0;border-radius:6px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn.sec{background:#fff;color:var(--navy);border:1px solid var(--navy)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+table{border-collapse:collapse;width:100%}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top;font-size:15px}
+th{color:var(--navy)}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:860px){.zones{grid-template-columns:1fr}}
+.zone{border:1px solid var(--line);border-radius:8px;padding:12px}
+.zone h4{margin:0 0 6px;color:var(--navy)}
+.zone.z2{border-color:var(--navy);background:var(--pale)}
+.barrow{display:grid;grid-template-columns:200px 1fr 36px;gap:8px;align-items:center;margin:6px 0;font-size:14px}
+.bar{background:var(--blue);height:18px;border-radius:3px}
+.banner{background:var(--teal);color:var(--navy);padding:10px 14px;border-radius:8px;margin-bottom:12px;font-weight:600;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.fac{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:3px solid var(--teal);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;z-index:10;font-size:14px}
+.fac b{color:var(--navy)}
+#toast{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:6px;display:none;z-index:20}
+.guide{border:2px solid var(--navy);border-radius:8px;padding:18px;margin-top:12px}
+.guide h3{margin-top:14px}
+.guide ul{margin:4px 0 0;padding-left:20px}
+.tl{display:inline-block;padding:2px 8px;border-radius:10px;font-size:13px;font-weight:600}
+@media print{.fac,nav,.top,.noprint{display:none!important}.wrap{display:block}}
+</style>
+</head>
+<body>
+<div id="toast" role="status"></div>
+<header class="top">
+<h1>Tu manuscrito, tu revista: taller Sage</h1>
+<span>Plataforma del taller - versión 1 (vista previa)</span>
+</header>
+<div class="wrap nojoin" id="wrap">
+<nav id="nav" aria-label="Etapas del taller"></nav>
+<main id="main"></main>
+</div>
+<div class="fac" id="fac"></div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============ Datos fijos ============ */
+var DIMS=[
+{k:'alcance',l:'Alcance',why:'Determina la audiencia y el impacto de tu artículo: quién lo va a leer y desde dónde.',check:'Revisa a qué disciplinas, países y tipos de lector se dirige; mira la página About y los números recientes.'},
+{k:'prestigio',l:'Prestigio',why:'Ayuda a valorar el reconocimiento de la revista entre pares y para tu institución. No es el único criterio.',check:'Busca factor de impacto, cuartiles e indexación en las bases que usa tu institución; no te quedes con una sola métrica.'},
+{k:'ajuste',l:'Ajuste temático',why:'Un buen ajuste hace más probable que el editor envíe tu manuscrito a revisión.',check:'Lee los títulos de los últimos números y compáralos con tu pregunta de investigación, de la mayor cantidad de formas posibles.'},
+{k:'politicas',l:'Políticas editoriales y formato',why:'Seguir las normas de la revista evita rechazos por razones que no tienen que ver con tu investigación.',check:'Lee las guías para autores: tipos de artículo, formato, extensión y declaraciones requeridas.'},
+{k:'costo',l:'Costo y acceso abierto',why:'Puede cambiar tu decisión: hay revistas con y sin cargo de publicación (APC) y acuerdos que lo reducen.',check:'Confirma si cobra APC, qué modalidad de acceso abierto ofrece y cómo se aplica el acuerdo de tu universidad.'},
+{k:'proceso',l:'Proceso de envío y revisión',why:'Define cuánto puedes tardar y qué esperar: tipo de revisión, plazos y pasos.',check:'Busca el tipo de revisión por pares, los tiempos de primera decisión y el sistema de envío.'}
+];
+var POL=['Política de IA generativa','Disponibilidad de datos o materiales suplementarios','Declaración ética o de conflicto de intereses','Resumen gráfico','Implicaciones prácticas','Autoría y roles de los autores'];
+var ELS=[
+{l:'Resumen gráfico (graphical abstract)',p:'Resumen gráfico'},
+{l:'Sección de implicaciones prácticas',p:'Implicaciones prácticas'},
+{l:'Declaraciones éticas y de conflicto de intereses',p:'Declaración ética o de conflicto de intereses'},
+{l:'Datos y materiales complementarios',p:'Disponibilidad de datos o materiales suplementarios'},
+{l:'Autoría responsable (qué hizo cada autor)',p:'Autoría y roles de los autores'},
+{l:'Declaración de uso de IA generativa',p:'Política de IA generativa'}
+];
+var EL_OPTS=['Lo pide mi revista','No lo vi','Por confirmar'];
+var PRESETS={
+general:{n:'IMRyD general',s:[['Introducción',15],['Métodos',20],['Resultados',30],['Discusión',30],['Conclusiones',5]]},
+sociales:{n:'Ciencias sociales y humanidades',s:[['Introducción',12],['Marco teórico o discusión conceptual',23],['Métodos',15],['Resultados',25],['Discusión',20],['Conclusiones',5]]},
+educacion:{n:'Educación y psicología',s:[['Introducción',10],['Revisión de literatura',20],['Métodos',18],['Resultados',22],['Discusión',25],['Conclusiones',5]]},
+ingenieria:{n:'Ingeniería y ciencias aplicadas',s:[['Introducción',10],['Métodos',30],['Resultados',35],['Discusión y conclusiones',25]]},
+cualitativa:{n:'Investigación cualitativa',s:[['Introducción',15],['Método',15],['Hallazgos',40],['Reflexión y conclusiones',30]]}
+};
+var ERR=[
+{g:'Errores conceptuales o de contenido',i:['Falta de claridad en los objetivos o hipótesis','Desconexión entre problema, método y resultados','Ausencia de aporte original o justificación débil']},
+{g:'Errores de organización y estructura',i:['Falta de coherencia interna o flujo lógico mal planteado','Repetición innecesaria de ideas en diferentes secciones','Secciones sobredimensionadas (por ejemplo, una Introducción demasiado extensa)']},
+{g:'Errores lingüísticos y de estilo',i:['Gramática, puntuación, concordancia y tiempos verbales','Terminología incorrecta o jerga excesiva','Frases largas, cláusulas mal ubicadas y pronombres ambiguos','Errores tipográficos y abreviaturas inconsistentes']}
+];
+var TOOLS=['Gestores bibliográficos (Zotero, Mendeley, EndNote)','Revisores de estilo (Grammarly, Writefull, DeepL Write)','Sage Campus: cursos de redacción académica, diseño de investigación y ética','Serie de webinars How to do research & get published'];
+var ROOM_SEED={alcance:6,prestigio:9,ajuste:14,politicas:8,costo:7,proceso:3};
+var NA='No lo encontré';
+
+/* ============ Estado (solo en memoria) ============ */
+var S={joined:false,unlocked:0,current:0,banner:null,j:{},r:{tipos:[],prestigio:[]},l:{politicas:[]},mapa:{},top3:[],comun:{},esq:{preset:'general',pct:{},els:{}},tit:{checks:[],kw:{}},abs:{limit:'250',checks:[]},sem:{},tools:[],shots:{}};
+
+function getPath(p){return p.split('.').reduce(function(o,k){return o==null?undefined:o[k]},S)}
+function setPath(p,v){var a=p.split('.'),o=S;for(var i=0;i<a.length-1;i++){if(o[a[i]]==null||typeof o[a[i]]!=='object')o[a[i]]={};o=o[a[i]]}o[a[a.length-1]]=v}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function idOf(p){return 'f-'+p.replace(/[^a-z0-9]/gi,'-')}
+function words(s){s=(s||'').trim();return s?s.split(/\s+/).length:0}
+function $(s){return document.querySelector(s)}
+function dim(k){return DIMS.filter(function(d){return d.k===k})[0]}
+
+/* ============ Ayudas de formulario ============ */
+function tx(p,label,ph){return '<label for="'+idOf(p)+'">'+label+'</label><input type="text" id="'+idOf(p)+'" data-k="'+p+'" value="'+esc(getPath(p))+'" placeholder="'+esc(ph||'')+'">'}
+function ta(p,label,ph){return '<label for="'+idOf(p)+'">'+label+'</label><textarea id="'+idOf(p)+'" data-k="'+p+'" placeholder="'+esc(ph||'')+'">'+esc(getPath(p))+'</textarea>'}
+function nm(p,label,def){var v=getPath(p);return '<label for="'+idOf(p)+'">'+label+'</label><input type="number" min="0" id="'+idOf(p)+'" data-k="'+p+'" value="'+esc(v==null||v===''?def:v)+'">'}
+function sel(p,label,opts,def,aria){var cur=getPath(p);if(cur==null||cur==='')cur=def||'';var h=(label?'<label for="'+idOf(p)+'">'+label+'</label>':'')+'<select id="'+idOf(p)+'" data-k="'+p+'"'+(aria?' aria-label="'+esc(aria)+'"':'')+'><option value="">Elige...</option>';opts.forEach(function(o){var v=Array.isArray(o)?o[0]:o,t=Array.isArray(o)?o[1]:o;h+='<option value="'+esc(v)+'"'+(v===cur?' selected':'')+'>'+esc(t)+'</option>'});return h+'</select>'}
+function chks(p,label,opts){var arr=getPath(p)||[];var h=(label?'<label>'+label+'</label>':'');opts.forEach(function(o){h+='<label class="chk"><input type="checkbox" data-k="'+p+'" data-arr="1" value="'+esc(o)+'"'+(arr.indexOf(o)>-1?' checked':'')+'> <span>'+esc(o)+'</span></label>'});return h}
+function shotBox(key,label){return '<div><label>'+label+'</label><div class="shot" id="shot-'+key+'">'+shotInner(key)+'</div><label for="file-'+key+'" class="small" style="margin-top:8px">Subir captura</label><input type="file" id="file-'+key+'" accept="image/*" data-shot="'+key+'"><p class="small" style="margin-top:6px">La imagen se queda en tu navegador. No se sube a ningún servidor.</p></div>'}
+function shotInner(key){return S.shots[key]?'<img alt="Captura de la revista" src="'+S.shots[key]+'">':'<span>Aún no subes una captura.<br>Elige un archivo abajo.</span>'}
+function why(k){var d=dim(k);return '<details><summary>'+d.l+': por qué importa</summary><p>'+d.why+'</p><p><b>Qué verificar:</b> '+d.check+'</p></details>'}
+function navBtns(i){var last=STAGES.length-1;var h='<div class="row noprint" style="margin-top:16px">';if(i>0)h+='<button class="btn sec" data-go="'+(i-1)+'">Etapa anterior</button>';if(i<last){var ok=(i+1)<=S.unlocked;h+='<button class="btn" data-go="'+(i+1)+'"'+(ok?'':' disabled')+'>Siguiente etapa</button>'+(ok?'':'<span class="small">La siguiente etapa se habilita cuando el tallerista la abra.</span>')}return h+'</div>'}
+
+/* ============ Etapas ============ */
+function r0(){
+var agenda='<ol>'+STAGES.map(function(s,i){return '<li>'+s.t+' ('+s.min+' min)'+(i===4?' - luego pausa de 5 min':'')+'</li>'}).join('')+'</ol>';
+return '<div class="card"><h2>Bienvenido/a al taller</h2><p>Hoy vas a trabajar con una revista real de Sage. La plataforma se abre paso a paso, al ritmo del tallerista. No hay respuestas buenas ni malas: lo que escribas te sirve para decidir mejor.</p><div class="note"><b>Privacidad:</b> la plataforma no guarda nada. Lo que escribes vive solo en tu navegador, así que no recargues la página. Lo único que se comparte es tu voto de la puesta en común, sin nombre y sin guardarse. Al final copiarás tu guía personal.</div></div>'+
+'<div class="card"><h3>Tu punto de partida</h3>'+tx('j.name','Nombre de la revista de Sage que elegiste','Ej.: Journal of Health Psychology')+tx('j.url','Dirección web de la revista (opcional)','https://journals.sagepub.com/...')+tx('j.area','Tu área o disciplina')+tx('j.topic','Tu tema de investigación en una frase')+'<p class="small" style="margin-top:10px">Si no tienes revista elegida, escribe la que te indique el tallerista como ejemplo.</p></div>'+
+'<div class="card"><h3>Ruta del taller</h3>'+agenda+'</div>'+navBtns(0)}
+
+function r1(){
+return '<div class="card"><h2>Radiografía de mi revista</h2><p>Entra a la página de tu revista en Sage Journals, abre <b>Aims &amp; Scope</b> (o About this journal), toma una captura y súbela. Luego léela con las preguntas de la derecha.</p><div class="cols">'+
+shotBox('r','Captura de Aims &amp; Scope')+
+'<div>'+tx('r.areas','Áreas o disciplinas que cubre')+tx('r.audiencia','¿A quién se dirige?')+
+chks('r.tipos','Tipos de contenido que menciona',['Artículos originales','Revisiones','Estudios de caso','Comentarios o cartas','Otros'])+
+chks('r.prestigio','Indicadores de prestigio que encontré',['Factor de impacto','Cuartil','Indexación en bases (Scopus, Web of Science u otras)','Sociedad o editor asociado','Ninguno visible'])+
+sel('r.ajuste','¿Qué tan bien encaja mi tema?',[['1','1 - Casi no encaja'],['2','2 - Encaja poco'],['3','3 - Encaja en parte'],['4','4 - Encaja bien'],['5','5 - Encaja muy bien']])+
+tx('r.nota','¿Qué me llamó la atención?')+'</div></div>'+
+why('alcance')+why('prestigio')+why('ajuste')+'</div>'+navBtns(1)}
+
+function r2(){
+return '<div class="card"><h2>Letra pequeña</h2><p>Ahora abre las <b>guías para autores</b> (Submission Guidelines) de la misma revista, toma una captura y súbela. Busca tipología, formatos, proceso y costo.</p><div class="cols">'+
+shotBox('l','Captura de Submission Guidelines')+
+'<div>'+tx('l.tipo','Tipo de artículo que voy a enviar')+nm('l.palabras','Límite de palabras que indica (si lo encontré)','')+
+sel('l.refs','Formato de referencias',['APA','Vancouver','Harvard','Chicago','Otro',NA])+
+sel('l.revision','Revisión por pares',['Doble ciego','Simple ciego','Abierta','Otra',NA])+
+tx('l.tiempos','Tiempos de decisión que menciona')+
+sel('l.apc','¿Cobra cargo de publicación (APC)?',['Sí','No','Depende de la modalidad de acceso abierto',NA])+
+chks('l.politicas','Políticas y elementos que encontré',POL)+'</div></div>'+
+'<div class="note"><b>Tu universidad:</b> el Acuerdo Transformativo con el Consorcio Colombia ofrece 90 % de descuento en APC en revistas híbridas y 100 % en revistas gold. Pregunta en tu biblioteca cómo se aplica a tu caso.</div>'+
+why('politicas')+why('costo')+why('proceso')+'</div>'+navBtns(2)}
+
+function claroOf(k){
+var v=getPath('mapa.'+k+'.claro');if(v)return v;
+var ok=false;
+if(k==='alcance')ok=!!(S.r.areas&&S.r.audiencia);
+if(k==='prestigio')ok=(S.r.prestigio||[]).filter(function(x){return x!=='Ninguno visible'}).length>0;
+if(k==='ajuste')ok=!!S.r.ajuste;
+if(k==='politicas')ok=!!((S.l.politicas||[]).length||S.l.tipo);
+if(k==='costo')ok=!!(S.l.apc&&S.l.apc!==NA);
+if(k==='proceso')ok=!!(S.l.revision&&S.l.revision!==NA);
+return ok?'clara':'aclarar'}
+function r3(){
+var rows=DIMS.map(function(d){return '<tr><td><b>'+d.l+'</b></td><td>'+sel('mapa.'+d.k+'.claro','',[['clara','Lo encontré claro'],['aclarar','Por aclarar']],claroOf(d.k),'Claridad de '+d.l)+'</td><td>'+sel('mapa.'+d.k+'.imp','',[['importante','Importante para mí'],['secundario','Secundario']],'','Importancia de '+d.l)+'</td></tr>'}).join('');
+return '<div class="card"><h2>Mis prioridades y mapa de ajuste</h2><p>Para cada dimensión marca qué tan claro lo encontraste y cuánto pesa para ti. La claridad viene sugerida según lo que escribiste; cámbiala si quieres.</p><table><thead><tr><th>Dimensión</th><th>Lo que encontré</th><th>Peso para mí</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+'<div class="card">'+chks('top3','Mis 3 prioridades para elegir revista (máximo 3)',DIMS.map(function(d){return d.l}))+'</div>'+
+'<div class="card"><h3>Mi mapa</h3><div id="zones" class="zones"></div></div>'+navBtns(3)}
+function d3(){
+var z={z1:[],z2:[],z3:[],z4:[],z0:[]};
+DIMS.forEach(function(d){var imp=getPath('mapa.'+d.k+'.imp'),c=claroOf(d.k);
+if(!imp)z.z0.push(d);else if(imp==='importante')(c==='clara'?z.z1:z.z2).push(d);else (c==='clara'?z.z3:z.z4).push(d)});
+function list(a,mode){if(!a.length)return '<p class="small">Nada por aquí.</p>';return a.map(function(d){return '<p><b>'+d.l+'</b>'+(mode==='ok'?'<br><span class="small">Ya lo tienes: anótalo en tu guía.</span>':'<br><span class="small">Por qué importa: '+d.why+'</span><br><span class="small"><b>Qué verificar:</b> '+d.check+'</span>')+'</p>'}).join('')}
+var h='<div class="zone"><h4>Importante y claro</h4>'+list(z.z1,'ok')+'</div><div class="zone z2"><h4>Importante y por aclarar</h4>'+list(z.z2)+'</div><div class="zone"><h4>Secundario y claro</h4>'+list(z.z3,'ok')+'</div><div class="zone"><h4>Secundario y por aclarar</h4>'+list(z.z4)+'</div>';
+if(z.z0.length)h+='<div class="zone" style="grid-column:1/-1"><h4>Sin clasificar</h4><p class="small">Aún no marcas el peso de: '+z.z0.map(function(d){return d.l}).join(', ')+'.</p></div>';
+$('#zones').innerHTML=h}
+
+function r4(){
+return '<div class="card"><h2>Puesta en común</h2><p>Elige la dimensión que más pesó en tu decisión. El tallerista mostrará lo que pasó en la sala y comentará 2 o 3 casos voluntarios.</p>'+
+DIMS.map(function(d){return '<label class="chk"><input type="radio" name="voto" data-k="comun.voto" value="'+d.k+'"'+(S.comun.voto===d.k?' checked':'')+'> <span>'+d.l+'</span></label>'}).join('')+
+'<div class="note" id="roomnote"></div><div id="room"></div>'+
+ta('comun.frase','En una frase: ¿por qué esta revista?')+'</div>'+navBtns(4)}
+function d4(){
+var live=!!S.tally,tot=0,max=1,v={};
+DIMS.forEach(function(d){v[d.k]=live?(S.tally[d.k]||0):ROOM_SEED[d.k]+(S.comun.voto===d.k?1:0);tot+=v[d.k];if(v[d.k]>max)max=v[d.k]});
+$('#roomnote').innerHTML=live?'Votos de la sala en vivo. No se guardan ni llevan nombre.':'Mostrando <b>datos de ejemplo</b>: no hay conexión en vivo.';
+$('#room').innerHTML=DIMS.map(function(d){return '<div class="barrow"><span>'+d.l+'</span><div><div class="bar" style="width:'+Math.round(v[d.k]/max*100)+'%"></div></div><span>'+v[d.k]+'</span></div>'}).join('')+'<p class="small">'+tot+' respuestas en total'+(live?'':' (ejemplo)')+'.</p>'}
+
+function pctOf(i){var p=S.esq.pct[i];if(p!=null&&p!=='')return p;return PRESETS[S.esq.preset].s[i][1]}
+function totalWords(){var t=parseInt(S.esq.total||S.l.palabras||'',10);return t>0?t:6000}
+function r5(){
+var ps=PRESETS[S.esq.preset];
+var rows=ps.s.map(function(s,i){return '<tr><td>'+s[0]+'</td><td style="width:110px"><input type="number" min="0" max="100" aria-label="Porcentaje de '+esc(s[0])+'" data-k="esq.pct.'+i+'" value="'+pctOf(i)+'"></td><td id="w'+i+'"></td></tr>'}).join('');
+var els=ELS.map(function(e,i){var cur=S.esq.els[i];if(!cur)cur=(S.l.politicas||[]).indexOf(e.p)>-1?EL_OPTS[0]:EL_OPTS[2];return '<tr><td>'+e.l+'</td><td>'+sel('esq.els.'+i,'',EL_OPTS,cur,e.l).replace('<option value="">Elige...</option>','')+'</td></tr>'}).join('');
+return '<div class="card"><h2>Mi esqueleto</h2><p>Reparte las palabras de tu manuscrito. Los porcentajes son un punto de partida editable: manda el límite y la tradición de tu revista y de tu campo.</p><div class="cols"><div>'+
+sel('esq.preset','Tipo de manuscrito',Object.keys(PRESETS).map(function(k){return [k,PRESETS[k].n]}),S.esq.preset).replace('<option value="">Elige...</option>','')+
+nm('esq.total','Palabras totales (límite de mi revista)',S.l.palabras||'6000')+'</div><div></div></div>'+
+'<table style="margin-top:12px"><thead><tr><th>Sección</th><th>%</th><th>Palabras</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td><b>Total</b></td><td id="psum"></td><td id="wsum"></td></tr></tfoot></table></div>'+
+'<div class="card"><h3>Elementos que pide mi revista</h3><p class="small">Marca lo que viste en las guías para autores. Lo demás queda por confirmar con la revista.</p><table><tbody>'+els+'</tbody></table></div>'+navBtns(5)}
+function d5(){
+var ps=PRESETS[S.esq.preset],T=totalWords(),sum=0,ws=0;
+ps.s.forEach(function(s,i){var p=parseFloat(pctOf(i))||0;sum+=p;var w=Math.round(T*p/100);ws+=w;var c=$('#w'+i);if(c)c.textContent=w});
+$('#psum').textContent=sum+' %'+(Math.round(sum)===100?'':' (suma distinta de 100: ajusta si quieres)');
+$('#wsum').textContent=ws}
+
+function r6(){
+return '<div class="card"><h2>De la pregunta al título</h2><p>Una pregunta de investigación se convierte en el problema central que guía tu manuscrito.</p>'+
+'<details><summary>Ejemplo</summary><p><b>Pregunta:</b> ¿Cómo afecta el microaprendizaje al rendimiento de estudiantes universitarios?</p><p><b>Título:</b> El impacto del microaprendizaje en el rendimiento académico de estudiantes de pregrado: un estudio experimental en América Latina.</p></details>'+
+ta('tit.q','Mi pregunta de investigación')+
+tx('tit.t','Mi título borrador')+'<p class="small" id="twc"></p>'+
+chks('tit.checks','Mi título...',['Dice qué estudio y en quién','Deja ver el tipo de estudio o el método','Se entiende sin leer el resumen','Usa palabras que alguien buscaría'])+'</div>'+
+'<div class="card"><h3>Resumen</h3><p class="small">La recomendación es de cerca de 250 palabras, pero se debe consultar siempre con la revista.</p>'+
+nm('abs.limit','Límite de palabras de mi revista','250')+
+ta('abs.t','Mi resumen (borrador)')+'<p class="small" id="awc"></p>'+
+chks('abs.checks','Mi resumen explica...',['El problema','El método','Los resultados','Las conclusiones'])+'</div>'+
+'<div class="card"><h3>Palabras clave</h3><p class="small">Usa términos normalizados cuando existan (por ejemplo, tesauro ERIC, MeSH o IEEE).</p>'+
+[0,1,2,3,4].map(function(i){return tx('tit.kw.'+i,'Palabra clave '+(i+1))}).join('')+'</div>'+navBtns(6)}
+function d6(){
+var n=words(S.tit.t);$('#twc').textContent=n+' palabras en el título';
+var m=words(S.abs.t),lim=parseInt(S.abs.limit||'',10);
+$('#awc').textContent=m+' palabras'+(lim>0?' de '+lim+(m>lim?' ('+(m-lim)+' sobre el límite que escribiste)':''):'')}
+
+function r7(){
+var h='<div class="card"><h2>Semáforo de rechazo</h2><p>Marca con honestidad en qué tanto te pasa cada error. No es una evaluación: es un mapa de dónde poner atención.</p>';
+ERR.forEach(function(g,gi){h+='<h3 style="margin-top:14px">'+g.g+'</h3><table><tbody>';g.i.forEach(function(it,ei){var k='sem.'+gi+'_'+ei;h+='<tr><td>'+it+'</td><td style="width:320px">'+['rojo|Me pasa seguido','amarillo|A veces','verde|Casi nunca'].map(function(o){var a=o.split('|');return '<label class="chk" style="display:inline-flex;margin-right:10px"><input type="radio" name="'+k+'" data-k="'+k+'" value="'+a[0]+'"'+(getPath(k)===a[0]?' checked':'')+'> <span>'+a[1]+'</span></label>'}).join('')+'</td></tr>'});h+='</tbody></table>'});
+return h+'<div class="note" id="semres"></div></div>'+navBtns(7)}
+function reds(){var a=[];ERR.forEach(function(g,gi){g.i.forEach(function(it,ei){if(getPath('sem.'+gi+'_'+ei)==='rojo')a.push(it)})});return a}
+function d7(){var a=reds();$('#semres').innerHTML=a.length?'<b>Mis puntos de atención ('+a.length+'):</b><ul>'+a.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>':'Aún no marcas ninguno en rojo.'}
+
+function guideModel(){
+var G=[],none='Sin completar';
+function add(h,lines){G.push({h:h,lines:lines.filter(Boolean).length?lines.filter(Boolean):[none]})}
+function kv(k,v){return v&&String(v).length?k+': '+v:''}
+add('Mi revista',[kv('Revista',S.j.name),kv('Dirección',S.j.url),kv('Mi área',S.j.area),kv('Mi tema',S.j.topic)]);
+add('Lo que vi en Aims & Scope',[kv('Áreas',S.r.areas),kv('Audiencia',S.r.audiencia),kv('Contenido',(S.r.tipos||[]).join(', ')),kv('Prestigio',(S.r.prestigio||[]).join(', ')),kv('Encaje con mi tema (1 a 5)',S.r.ajuste),kv('Me llamó la atención',S.r.nota)]);
+add('Lo que vi en las guías para autores',[kv('Tipo de artículo',S.l.tipo),kv('Límite de palabras',S.l.palabras),kv('Referencias',S.l.refs),kv('Revisión por pares',S.l.revision),kv('Tiempos',S.l.tiempos),kv('APC',S.l.apc),kv('Políticas y elementos',(S.l.politicas||[]).join(', '))]);
+add('Mis 3 prioridades',(S.top3||[]).map(function(l){var d=DIMS.filter(function(x){return x.l===l})[0];return d?d.l+': '+d.check:l}));
+var zl=[];DIMS.forEach(function(d){var imp=getPath('mapa.'+d.k+'.imp');if(imp)zl.push(d.l+' - '+(imp==='importante'?'importante':'secundario')+' y '+(claroOf(d.k)==='clara'?'claro':'por aclarar'))});
+add('Mi mapa de ajuste',zl);
+var ver=[];DIMS.forEach(function(d){if(claroOf(d.k)==='aclarar')ver.push(d.l+': '+d.check)});
+ELS.forEach(function(e,i){var cur=S.esq.els[i]||((S.l.politicas||[]).indexOf(e.p)>-1?EL_OPTS[0]:EL_OPTS[2]);if(cur===EL_OPTS[2])ver.push('Confirmar con la revista: '+e.l)});
+add('Qué verificar antes de enviar',ver);
+var ps=PRESETS[S.esq.preset],T=totalWords();
+add('Mi esqueleto ('+ps.n+', '+T+' palabras)',ps.s.map(function(s,i){var p=parseFloat(pctOf(i))||0;return s[0]+': '+p+' % (unas '+Math.round(T*p/100)+' palabras)'}));
+add('Elementos adicionales',ELS.map(function(e,i){var cur=S.esq.els[i]||((S.l.politicas||[]).indexOf(e.p)>-1?EL_OPTS[0]:EL_OPTS[2]);return e.l+': '+cur}));
+var kws=[0,1,2,3,4].map(function(i){return S.tit.kw[i]}).filter(Boolean);
+add('Título, resumen y palabras clave',[kv('Pregunta',S.tit.q),kv('Título',S.tit.t),kv('Resumen',S.abs.t),kv('Palabras clave',kws.join('; '))]);
+add('Mis puntos de atención para evitar rechazos',reds());
+add('Herramientas que voy a usar',S.tools||[]);
+return G}
+function guideHtml(){return guideModel().map(function(s){return '<h3>'+esc(s.h)+'</h3><ul>'+s.lines.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul>'}).join('')}
+function guideText(){return 'MI GUÍA PERSONAL - Tu manuscrito, tu revista: taller Sage\n\n'+guideModel().map(function(s){return s.h.toUpperCase()+'\n'+s.lines.map(function(l){return '- '+l}).join('\n')}).join('\n\n')}
+function r8(){
+return '<div class="card"><h2>Herramientas y mi guía</h2><p>Elige las herramientas que podrías usar en la construcción de tu manuscrito.</p>'+chks('tools','',TOOLS)+
+'<div class="note">Si usas IA generativa, revisa primero la política de tu revista y decláralo cuando lo pida.</div></div>'+
+'<div class="card"><h3>Mi guía personal</h3><p>Se arma con lo que escribiste. Cópiala antes de cerrar: la plataforma no guarda nada.</p><div class="row noprint"><button class="btn" id="copyg">Copiar mi guía</button></div><div class="guide" id="guide"></div></div>'+navBtns(8)}
+function d8(){$('#guide').innerHTML=guideHtml()}
+
+var STAGES=[
+{t:'Bienvenida',min:10,r:r0},
+{t:'Radiografía de mi revista',min:12,r:r1},
+{t:'Letra pequeña',min:10,r:r2},
+{t:'Mis prioridades y mapa de ajuste',min:8,r:r3,d:d3},
+{t:'Puesta en común',min:5,r:r4,d:d4},
+{t:'Mi esqueleto',min:30,r:r5,d:d5},
+{t:'De la pregunta al título',min:25,r:r6,d:d6},
+{t:'Semáforo de rechazo',min:6,r:r7,d:d7},
+{t:'Herramientas y mi guía',min:9,r:r8,d:d8}
+];
+
+/* ============ Dibujo ============ */
+function renderNav(){
+$('#nav').innerHTML=STAGES.map(function(s,i){var open=i<=S.unlocked;return '<button class="step'+(i===S.current?' cur':'')+'" data-go="'+i+'"'+(open?'':' disabled')+'><span class="n">'+(i+1)+'</span><span>'+s.t+'<small>'+(open?(i===S.unlocked?'Etapa actual - ':'Disponible - ')+s.min+' min':'Aún no habilitada')+'</small></span></button>'}).join('')}
+function renderMain(){
+var m=$('#main');
+if(!S.joined){m.innerHTML='<div class="card"><h2>Entrar al taller</h2><p>Escribe el código que el tallerista muestra en pantalla. No necesitas crear cuenta.</p><label for="code">Código del taller</label><input type="text" id="code" placeholder="Ej.: SAGE-UNAL"><div class="row" style="margin-top:12px"><button class="btn" id="join">Entrar</button></div>'+(DEMO?'<p class="small" style="margin-top:10px">Modo demo: cualquier código sirve.</p>':'')+'</div>';return}
+var st=STAGES[S.current];
+m.innerHTML=(S.banner?'<div class="banner" id="banner"><span>'+S.banner+'</span><button class="btn" data-go="'+S.unlocked+'">Ir ahora</button></div>':'')+st.r();
+if(st.d)st.d()}
+function connText(){return CONN==='live'?'Conectado en vivo: las etapas se habilitan solas.':CONN==='conectando'?'Conectando...':'Modo código: escribe el código de etapa que el tallerista comparta en el chat.'}
+function setConn(c){CONN=c;var e=$('#conn');if(e)e.textContent=connText()}
+function renderFac(){
+if(DEMO){var s=STAGES[S.unlocked];
+$('#fac').innerHTML='<b>Consola del tallerista (simulada, modo demo)</b><span>Etapa habilitada: '+(S.unlocked+1)+' de '+STAGES.length+' - '+s.t+'</span><button class="btn sec" id="fprev"'+(S.unlocked===0?' disabled':'')+'>Cerrar una etapa</button><button class="btn" id="fnext"'+(S.unlocked===STAGES.length-1?' disabled':'')+'>Habilitar siguiente</button><button class="btn sec" id="fall">Habilitar todas</button>';return}
+$('#fac').innerHTML='<span id="conn">'+connText()+'</span><label for="stcode" class="small" style="margin:0">Código de etapa:</label><input type="text" id="stcode" style="width:110px" maxlength="8"><button class="btn" id="stgo">Usar código</button>'}
+function renderAll(){$('#wrap').className='wrap'+(S.joined?'':' nojoin');renderNav();renderMain();renderFac()}
+function toast(t){var e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(function(){e.style.display='none'},2500)}
+function unlock(n){
+var before=S.unlocked;S.unlocked=Math.max(0,Math.min(STAGES.length-1,n));
+if(S.current>S.unlocked)S.current=S.unlocked;
+S.banner=(S.joined&&S.unlocked>before)?'Se habilitó: '+STAGES[S.unlocked].t:null;
+renderAll()}
+
+/* ============ Tiempo real y códigos ============ */
+var CFG=window.TALLER||{},DEMO=location.search.indexOf('demo=1')>-1,CONN='codigo',CH=null,MYID=Math.random().toString(36).slice(2,10);
+function chanName(){return 'taller-'+String(CFG.CODE||'sage').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function startRealtime(){
+if(DEMO||CH||!CFG.SUPABASE_URL||!CFG.SUPABASE_KEY||!window.supabase){setConn('codigo');return}
+try{
+setConn('conectando');
+var sb=window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_KEY);
+CH=sb.channel(chanName());
+CH.on('broadcast',{event:'stage'},function(m){var n=m&&m.payload&&m.payload.stage;if(typeof n==='number'&&n>=0&&n<STAGES.length&&n!==S.unlocked)unlock(n)})
+.on('broadcast',{event:'tally'},function(m){S.tally=(m&&m.payload&&m.payload.counts)||null;if(S.joined&&S.current===4)d4()})
+.subscribe(function(st){
+if(st==='SUBSCRIBED'){setConn('live');CH.send({type:'broadcast',event:'hello',payload:{}});if(S.comun.voto)sendVote(S.comun.voto)}
+else if(st==='CLOSED'||st==='CHANNEL_ERROR'||st==='TIMED_OUT')setConn('codigo')})
+}catch(x){setConn('codigo')}}
+function sendVote(v){if(CH&&CONN==='live')CH.send({type:'broadcast',event:'vote',payload:{id:MYID,dim:v}})}
+function sha(t){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)).then(function(h){return Array.prototype.map.call(new Uint8Array(h),function(x){return ('0'+x.toString(16)).slice(-2)}).join('')})}
+function stageCode(n){return sha((CFG.SALT||'')+':'+(CFG.CODE||'')+':'+n).then(function(h){return h.slice(0,4).toUpperCase()})}
+function tryCode(txt){
+txt=String(txt||'').trim().toUpperCase();if(!txt)return;
+var i=1,found=-1;
+(function next(){
+if(i>=STAGES.length){if(found<0)toast('Código no válido');else if(found<=S.unlocked)toast('Esa etapa ya está habilitada');else unlock(found);return}
+stageCode(i).then(function(c){if(c===txt)found=i;i++;next()})})()}
+
+/* ============ Eventos ============ */
+document.addEventListener('click',function(e){
+var t=e.target.closest('[data-go],#join,#fprev,#fnext,#fall,#copyg,#stgo');if(!t)return;
+if(t.dataset.go!=null){var i=parseInt(t.dataset.go,10);if(i<=S.unlocked){S.current=i;S.banner=null;renderAll();window.scrollTo(0,0)}return}
+if(t.id==='join'){var c=(($('#code')||{}).value||'').trim().toUpperCase();if(!DEMO&&c!==String(CFG.CODE||'').toUpperCase()){toast('Código del taller incorrecto');return}S.joined=true;startRealtime();renderAll();return}
+if(t.id==='stgo'){tryCode(($('#stcode')||{}).value);return}
+if(t.id==='fprev'){unlock(S.unlocked-1);return}
+if(t.id==='fnext'){unlock(S.unlocked+1);return}
+if(t.id==='fall'){unlock(STAGES.length-1);return}
+if(t.id==='copyg'){try{navigator.clipboard.writeText(guideText()).then(function(){toast('Guía copiada')},function(){toast('No se pudo copiar: selecciona el texto de la guía')})}catch(x){toast('No se pudo copiar: selecciona el texto de la guía')}}
+});
+function onInput(e){
+var t=e.target;
+if(t.dataset&&t.dataset.shot){var f=t.files&&t.files[0];if(f){S.shots[t.dataset.shot]=URL.createObjectURL(f);var box=$('#shot-'+t.dataset.shot);if(box)box.innerHTML=shotInner(t.dataset.shot)}return}
+var k=t.dataset&&t.dataset.k;if(!k)return;
+if(t.type==='checkbox'&&t.dataset.arr){
+var arr=(getPath(k)||[]).slice();
+if(t.checked){if(arr.indexOf(t.value)<0)arr.push(t.value)}else arr=arr.filter(function(v){return v!==t.value});
+if(k==='top3'&&arr.length>3){t.checked=false;arr=arr.filter(function(v){return v!==t.value});toast('Elige máximo 3 prioridades')}
+setPath(k,arr)}
+else if(t.type==='checkbox')setPath(k,t.checked);
+else setPath(k,t.value);
+if(k==='comun.voto')sendVote(t.value);
+if(k==='esq.preset'){S.esq.pct={};renderMain();return}
+var st=STAGES[S.current];if(st&&st.d)st.d()}
+$('#main').addEventListener('input',onInput);
+$('#main').addEventListener('change',onInput);
+
+renderAll();
+</script>
+</body>
+</html>
