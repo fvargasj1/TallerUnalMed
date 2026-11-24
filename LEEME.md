@@ -15,3 +15,6 @@ Sin ellas, los titulares usan Open Sans automáticamente.
 - Etapa nueva: botón "Habilitar siguiente etapa". Comparte el enlace de participantes y el código de entrada (SAGE-UNAL) en el chat al inicio.
 - Si alguien no se conecta: "Copiar mensaje para el chat" trae el código de esa etapa. Los códigos son nombres de recursos de Sage: JOURNALS, METHODS, BOOKS, BUSINESS, CAMPUS, SKILLS, VIDEO y DATA (se pueden cambiar en config.js, lista CODES).
 - No cierres la pestaña de la consola: reenvía la etapa cada 8 segundos para quienes entren tarde.
+
+## PDF de la guía
+En la última etapa el participante marca una casilla de responsabilidad y descarga su guía en PDF con diseño Sage. El PDF se genera en su dispositivo con las librerías de la carpeta vendor/ (jsPDF y Open Sans). La plataforma no muestra la guía en pantalla ni guarda nada.

@@ -39,7 +39,7 @@
 var DIMS=[
 {k:'alcance',l:'Alcance',why:'Determina la audiencia y el impacto de tu artículo: quién lo va a leer y desde dónde.',check:'Revisa a qué disciplinas, países y tipos de lector se dirige; mira la página About y los números recientes.'},
 {k:'prestigio',l:'Prestigio',why:'Ayuda a valorar el reconocimiento de la revista entre pares y para tu institución. No es el único criterio.',check:'Busca factor de impacto, cuartiles e indexación en las bases que usa tu institución; no te quedes con una sola métrica.'},
-{k:'ajuste',l:'Ajuste temático',why:'Un buen ajuste hace más probable que el editor envíe tu manuscrito a revisión.',check:'Lee los títulos de los últimos números y compáralos con tu pregunta de investigación, de la mayor cantidad de formas posibles.'},
+{k:'ajuste',l:'Ajuste temático',why:'Un buen ajuste hace más probable que el editor envíe tu manuscrito a revisión.',check:'Lee los títulos de los últimos números y compáralos con tu pregunta de investigación.'},
 {k:'politicas',l:'Políticas editoriales y formato',why:'Seguir las normas de la revista evita rechazos por razones que no tienen que ver con tu investigación.',check:'Lee las guías para autores: tipos de artículo, formato, extensión y declaraciones requeridas.'},
 {k:'costo',l:'Costo y acceso abierto',why:'Puede cambiar tu decisión: hay revistas con y sin cargo de publicación (APC) y acuerdos que lo reducen.',check:'Confirma si cobra APC, qué modalidad de acceso abierto ofrece y cómo se aplica el acuerdo de tu universidad.'},
 {k:'proceso',l:'Proceso de envío y revisión',why:'Define cuánto puedes tardar y qué esperar: tipo de revisión, plazos y pasos.',check:'Busca el tipo de revisión por pares, los tiempos de primera decisión y el sistema de envío.'}
@@ -211,20 +211,24 @@ var ver=[];DIMS.forEach(function(d){if(claroOf(d.k)==='aclarar')ver.push(d.l+': 
 ELS.forEach(function(e,i){var cur=S.esq.els[i]||((S.l.politicas||[]).indexOf(e.p)>-1?EL_OPTS[0]:EL_OPTS[2]);if(cur===EL_OPTS[2])ver.push('Confirmar con la revista: '+e.l)});
 add('Qué verificar antes de enviar',ver);
 var ps=PRESETS[S.esq.preset],T=totalWords();
-add('Mi esqueleto ('+ps.n+', '+T+' palabras)',ps.s.map(function(s,i){var p=parseFloat(pctOf(i))||0;return s[0]+': '+p+' % (unas '+Math.round(T*p/100)+' palabras)'}));
+add('Mi esqueleto ('+ps.n+', '+T+' palabras)',[kv('Nota','los porcentajes son una referencia editable: mandan el límite y la tradición de tu revista y de tu campo')].concat(ps.s.map(function(s,i){var p=parseFloat(pctOf(i))||0;return s[0]+': '+p+' % (unas '+Math.round(T*p/100)+' palabras)'})));
 add('Elementos adicionales',ELS.map(function(e,i){var cur=S.esq.els[i]||((S.l.politicas||[]).indexOf(e.p)>-1?EL_OPTS[0]:EL_OPTS[2]);return e.l+': '+cur}));
 var kws=[0,1,2,3,4].map(function(i){return S.tit.kw[i]}).filter(Boolean);
-add('Título, resumen y palabras clave',[kv('Pregunta',S.tit.q),kv('Título',S.tit.t),kv('Resumen',S.abs.t),kv('Palabras clave',kws.join('; '))]);
+add('Título, resumen y palabras clave',[kv('Pregunta',S.tit.q),kv('Título',S.tit.t),kv('Resumen',S.abs.t),(S.abs.t?kv('Nota sobre el resumen','la recomendación general es de cerca de 250 palabras; consulta siempre el límite con la revista'):''),kv('Palabras clave',kws.join('; '))]);
 add('Mis puntos de atención para evitar rechazos',reds());
 add('Herramientas que voy a usar',S.tools||[]);
 return G}
 function guideHtml(){return guideModel().map(function(s){return '<h3>'+esc(s.h)+'</h3><ul>'+s.lines.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul>'}).join('')}
 function guideText(){return 'MI GUÍA PERSONAL - Tu manuscrito, tu revista: taller Sage\n\n'+guideModel().map(function(s){return s.h.toUpperCase()+'\n'+s.lines.map(function(l){return '- '+l}).join('\n')}).join('\n\n')}
 function r8(){
-return '<div class="card"><h2>Herramientas y mi guía</h2><p>Elige las herramientas que podrías usar en la construcción de tu manuscrito.</p>'+chks('tools','',TOOLS)+
+return '<div class="card"><h2>Herramientas</h2><p>Elige las herramientas que podrías usar en la construcción de tu manuscrito.</p>'+chks('tools','',TOOLS)+
 '<div class="note">Si usas IA generativa, revisa primero la política de tu revista y decláralo cuando lo pida.</div></div>'+
-'<div class="card"><h3>Mi guía personal</h3><p>Se arma con lo que escribiste. Cópiala antes de cerrar: la plataforma no guarda nada.</p><div class="row noprint"><button class="btn" id="copyg">Copiar mi guía</button></div><div class="guide" id="guide"></div></div>'+navBtns(8)}
-function d8(){$('#guide').innerHTML=guideHtml()}
+'<div class="card"><h2>Mi guía en PDF</h2><p>Con todo lo que escribiste armamos tu guía personal, con diseño Sage. Se crea en tu dispositivo y se descarga como PDF: la plataforma no la muestra ni guarda nada.</p>'+
+'<div class="note"><b>Antes de descargar:</b> '+AVISO+'</div>'+
+'<label class="chk"><input type="checkbox" id="accept" data-k="accept"'+(S.accept?' checked':'')+'> <span>Entiendo y acepto que esta guía es solo una orientación y que la responsabilidad del proceso es 100 % mía y de mis coautores.</span></label>'+
+'<div class="row noprint" style="margin-top:12px"><button class="btn" id="pdf" type="button"'+(S.accept?'':' disabled')+'>Descargar mi guía en PDF</button></div>'+
+'<p class="small" style="margin-top:8px">Si el PDF no se descarga, intenta con otro navegador (Chrome, Edge o Safari).</p></div>'+navBtns(8)}
+function d8(){var b=$('#pdf');if(b)b.disabled=!S.accept}
 
 var STAGES=[
 {t:'Bienvenida',min:10,r:r0},
@@ -292,9 +296,82 @@ if(found<0)toast('Código no válido: usa el nombre del recurso que el tallerist
 else if(found<=S.unlocked)toast('Esa etapa ya está habilitada');
 else unlock(found)}
 
+/* ============ PDF de la guía (se genera en el dispositivo) ============ */
+var S_SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 436.19 618.82"><g fill="#348AF7"><path d="M100.72,130.34c4.41,25.68,23.72,46.8,58.91,64.51l181.68,91.12c57.32,28.78,88.94,69.93,88.94,115.95,0,51.13-35.35,83.39-94.64,86.48-4.41-25.68-23.72-46.8-58.91-64.51l-181.68-91.12C37.63,303.99,6.01,262.77,6.01,216.74c0-51.13,35.35-83.39,94.64-86.48"></path><path d="M222.2,0c59.98,0,147.47,20.42,213.99,77.51l-86.81,113.94c-55.49-52.68-154.54-90.73-236.41-90.73-25.77,0-48.27,3.79-66.9,11.29C87.95,53.22,138.66,0,222.2,0"></path><path d="M86.81,427.37c55.49,52.68,154.54,90.73,236.41,90.73,25.77,0,48.27-3.79,66.9-11.29-41.89,58.79-92.59,112.01-176.13,112.01-59.98,0-147.47-20.42-213.99-77.51l86.81-113.94"></path></g></svg>';
+function loadScript(src){return new Promise(function(ok,ko){if(document.querySelector('script[data-lib="'+src+'"]')){ok();return}var s=document.createElement('script');s.src=src;s.dataset.lib=src;s.onload=ok;s.onerror=function(){ko(new Error('No cargó '+src))};document.head.appendChild(s)})}
+function svgToPng(svg,w,h){return new Promise(function(ok,ko){var im=new Image();im.onload=function(){var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);ok(c.toDataURL('image/png'))};im.onerror=function(){ko(new Error('logo'))};im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)})}
+var AVISO='Esta guía no es un compromiso de aceptación de ningún manuscrito. Es solo una orientación que busca apoyar y facilitar el proceso. La responsabilidad de cada paso, del envío, de las correcciones y de la aceptación es 100 % del autor o de los autores.';
+function makePdf(){
+var btn=$('#pdf');if(!S.accept){toast('Marca la casilla para descargar');return}
+btn.disabled=true;btn.textContent='Preparando PDF...';
+var logoEl=document.querySelector('.logo'),logoSvg=new XMLSerializer().serializeToString(logoEl);
+Promise.all([loadScript('vendor/jspdf.umd.min.js'),loadScript('vendor/opensans-fonts.js')]).then(function(){
+return Promise.all([svgToPng(logoSvg,1236,429),svgToPng(S_SVG,436,619)])}).then(function(im){
+var J=window.jspdf.jsPDF,doc=new J({unit:'mm',format:'a4',compress:true});
+var F=window.OPEN_SANS_B64;
+doc.addFileToVFS('OS-R.ttf',F.regular);doc.addFont('OS-R.ttf','OpenSans','normal');
+doc.addFileToVFS('OS-S.ttf',F.semibold);doc.addFont('OS-S.ttf','OpenSans','semibold');
+doc.addFileToVFS('OS-B.ttf',F.bold);doc.addFont('OS-B.ttf','OpenSans','bold');
+var NAVY=[0,26,105],TEAL=[8,201,196],PALE=[217,238,255],BLUE=[52,138,247],INK=[17,17,17],MUTE=[74,87,117];
+var PW=210,PH=297,M=18,W=PW-2*M,y=0;
+function font(st,sz,col){doc.setFont('OpenSans',st==='regular'?'normal':st);doc.setFontSize(sz);doc.setTextColor(col[0],col[1],col[2])}
+function newPage(){doc.addPage();y=22}
+function need(h){if(y+h>PH-22)newPage()}
+/* Portada: banda Navy con logotipo blanco y la S */
+doc.setFillColor(NAVY[0],NAVY[1],NAVY[2]);doc.rect(0,0,PW,40,'F');
+doc.addImage(im[1],'PNG',PW-36,6,24,34);
+doc.addImage(im[0],'PNG',M,12,38,13.2);
+font('semibold',11,[217,238,255]);doc.text('Taller Sage para investigadores',M,33);
+y=56;
+font('semibold',22,NAVY);doc.text('Mi guía para elegir revista',M,y);y+=9;
+doc.text('y preparar mi manuscrito',M,y);y+=9;
+var rev=(S.j.name||'Mi revista de Sage');font('semibold',12,NAVY);
+var rw=Math.min(W,doc.getTextWidth(rev)+10);doc.setFillColor(TEAL[0],TEAL[1],TEAL[2]);doc.rect(M,y-1,rw,9,'F');
+doc.text(doc.splitTextToSize(rev,W-10)[0],M+5,y+5.2);y+=15;
+font('regular',9,MUTE);doc.text('Generada el '+new Date().toLocaleDateString('es-CO',{day:'numeric',month:'long',year:'numeric'})+' en tu dispositivo. Nada de esto se guardó en ningún servidor.',M,y);y+=10;
+/* Secciones */
+var G=guideModel();
+G.forEach(function(sec){
+need(18);
+font('semibold',13,NAVY);doc.text(sec.h,M,y);y+=2;
+doc.setDrawColor(TEAL[0],TEAL[1],TEAL[2]);doc.setLineWidth(0.8);doc.line(M,y,M+14,y);y+=6;
+sec.lines.forEach(function(l){
+var k='',v=l,i=l.indexOf(': ');
+if(i>0&&i<80){k=l.slice(0,i+1);v=l.slice(i+2)}
+var lh=4.9,ind=M+5,avail=W-5;
+font('semibold',10,INK);var kw=k?doc.getTextWidth(k+' '):0;
+font('regular',10,INK);
+var words=v.split(/\s+/),lines=[],cur='',first=true;
+words.forEach(function(w){var lim=first?avail-kw:avail;var t=cur?cur+' '+w:w;if(doc.getTextWidth(t)>lim&&cur){lines.push(cur);cur=w;first=false}else cur=t});
+if(cur||!lines.length)lines.push(cur);
+need(lines.length*lh+1);
+doc.setFillColor(BLUE[0],BLUE[1],BLUE[2]);doc.circle(M+1.6,y-1.3,0.7,'F');
+lines.forEach(function(t,n){
+if(n===0&&k){font('semibold',10,INK);doc.text(k,ind,y);font('regular',10,INK);doc.text(t,ind+kw,y)}
+else{font('regular',10,INK);doc.text(t,ind,y)}
+y+=lh});
+y+=0.8});
+y+=4});
+/* Aviso */
+font('regular',10,NAVY);
+var al=doc.splitTextToSize(AVISO,W-12),bh=al.length*4.9+14;
+need(bh+4);
+doc.setFillColor(PALE[0],PALE[1],PALE[2]);doc.roundedRect(M,y,W,bh,3,3,'F');
+font('semibold',10.5,NAVY);doc.text('Importante',M+6,y+7);
+font('regular',10,NAVY);doc.text(al,M+6,y+13);
+y+=bh+4;
+/* Pie en todas las páginas */
+var n=doc.getNumberOfPages();
+for(var p=1;p<=n;p++){doc.setPage(p);
+doc.setDrawColor(TEAL[0],TEAL[1],TEAL[2]);doc.setLineWidth(0.6);doc.line(M,PH-16,PW-M,PH-16);
+font('regular',8,MUTE);doc.text('Tu manuscrito, tu revista: taller Sage - guía de orientación, no es un compromiso de aceptación',M,PH-11);
+doc.text('Página '+p+' de '+n,PW-M,PH-11,{align:'right'})}
+doc.save('Mi-guia-manuscrito-Sage.pdf');
+toast('Guía descargada')}).catch(function(){toast('No se pudo crear el PDF. Revisa tu conexión e inténtalo de nuevo.')}).then(function(){btn.disabled=!S.accept;btn.textContent='Descargar mi guía en PDF'})}
+
 /* ============ Eventos ============ */
 document.addEventListener('click',function(e){
-var t=e.target.closest('[data-go],#join,#fprev,#fnext,#fall,#copyg,#stgo,#navtoggle,#theme');if(!t)return;
+var t=e.target.closest('[data-go],#join,#fprev,#fnext,#fall,#pdf,#stgo,#navtoggle,#theme');if(!t)return;
 if(t.id==='navtoggle'){NAVOPEN=!NAVOPEN;renderNav();return}
 if(t.id==='theme'){toggleTheme();return}
 if(t.dataset.go!=null){var i=parseInt(t.dataset.go,10);if(i<=S.unlocked){S.current=i;S.banner=null;NAVOPEN=false;renderAll();window.scrollTo(0,0)}return}
@@ -303,7 +380,8 @@ if(t.id==='stgo'){tryCode(($('#stcode')||{}).value);return}
 if(t.id==='fprev'){unlock(S.unlocked-1);return}
 if(t.id==='fnext'){unlock(S.unlocked+1);return}
 if(t.id==='fall'){unlock(STAGES.length-1);return}
-if(t.id==='copyg'){try{navigator.clipboard.writeText(guideText()).then(function(){toast('Guía copiada')},function(){toast('No se pudo copiar: selecciona el texto de la guía')})}catch(x){toast('No se pudo copiar: selecciona el texto de la guía')}}
+if(t.id==='pdf'){makePdf();return}
+
 });
 function onInput(e){
 var t=e.target;
